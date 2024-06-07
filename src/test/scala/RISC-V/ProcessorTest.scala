@@ -10,9 +10,6 @@ import org.scalatest.matchers.should.Matchers
 
 import collection.mutable
 import scala.io.Source
-import java.nio.file.Paths
-import java.nio.file.Path
-import java.io.FileWriter
 import java.io.File
 
 import RISCV.interfaces._
@@ -39,18 +36,16 @@ class ProcessorTest
         )
       )
     ).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
-      val programPath = Paths.get(s"src/test/resources/programs/$folderName/program.s").toAbsolutePath()
-      val configPath = Paths.get(s"src/test/resources/programs/$folderName/config.json").toAbsolutePath()
       var state = new ProcessorState()
 
-      val config: TestConfig = TestConfig.fromJson(java.nio.file.Files.readString(configPath)) match {
+      val config: TestConfig = TestConfig.fromJson(Source.fromResource(s"programs/$folderName/config.json").mkString) match {
         case Right(value) => value
         case Left(error) => throw new Exception(error)
       }
       resetCore(dut)
       state = prepareState(dut, config.initial_reg.map(x => x._1.toInt -> x._2.toInt).toMap)
       state.data_mem = config.initial_mem
-      state.instr_mem = RISCVAssembler.fromFile(programPath.toString()).split("\n").map(line => BigInt(line, 16).U).zipWithIndex.map(x=> BigInt(x._2*4 + state.pc) -> x._1.litValue).to(mutable.Map)
+      state.instr_mem = RISCVAssembler.fromString(Source.fromResource(s"programs/$folderName/program.s").mkString).split("\n").map(line => BigInt(line, 16).U).zipWithIndex.map(x=> BigInt(x._2*4 + state.pc) -> x._1.litValue).to(mutable.Map)
       for (i <- 0 until config.executed_instructions.toInt by 1) {
         val instr = state.instr_mem(state.pc)
         state = executeInstruction(dut, instr.U, state)
