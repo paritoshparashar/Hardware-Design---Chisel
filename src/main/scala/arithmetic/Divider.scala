@@ -13,9 +13,19 @@ class Divider(bitWidth: Int) extends Module {
         val remainder = Output(UInt(bitWidth.W))
     })
 
-    val remainder = RegInit(0.U(bitWidth.W))       //current remainder
-    val quotient = RegInit(VecInit(Seq.fill(bitWidth)(0.U(1.W))))   //= {dividend[i:0], quotient[N−1:i+1]}, where dividend is the input dividend and quotient is the final output quotient, and i is the current cycle
-    val divisor = RegInit(0.U(bitWidth.W))         //divisor
+    val remainder   =   RegInit(0.U(bitWidth.W))       //current remainder
+    val quotient    =   RegInit(VecInit(Seq.fill(bitWidth)(0.U(1.W))))   //= {dividend[i:0], quotient[N−1:i+1]}, where dividend is the input dividend and quotient is the final output quotient, and i is the current cycle
+    val divisor     =   RegInit(0.U(bitWidth.W))         //divisor
+
+    val stepI   =   RegInit (bitWidth.U(log2Ceil(bitWidth).W));
     
-    ??? // TODO: implement Problem 1.1 here
+    when (io.start) {
+        
+
+    } .otherwise {
+        io.remainder    :=  remainder;
+        io.quotient     :=  quotient.asUInt;
+        io.done         :=  true.B;
+
+    }
 }
