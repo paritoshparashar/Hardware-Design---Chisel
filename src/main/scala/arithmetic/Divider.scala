@@ -38,6 +38,11 @@ class Divider(bitWidth: Int) extends Module {
 
             when (io.start) {
 
+                when (divisor === 0.U) {
+                    remainder := dividend
+                    state := done
+                }
+
                 val intermediateRem =  (remainder << 1.U ) + io.dividend(stepI)  // R' = 2*R + A[i];
 
                 /* 
