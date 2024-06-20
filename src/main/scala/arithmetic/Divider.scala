@@ -18,7 +18,14 @@ class Divider(bitWidth: Int) extends Module {
     val divisor     =   RegInit(0.U(bitWidth.W))         //divisor
     val dividend     =   RegInit(0.U(bitWidth.W))         //divisor
 
-    val stepI       =   RegInit ((bitWidth-1).U(log2Ceil(bitWidth).W));
+    val stepI       =   RegInit ((bitWidth-1).U(log2Ceil(bitWidth).W)); // N cycles count
+    stepI       :=   (bitWidth - 1).U
+    // Default Outputs
+    io.remainder    :=  0.U;
+    io.quotient     :=  0.asUInt;
+    io.done         :=  false.B;
+
+    
 
     val start :: calculate :: done :: Nil = Enum(3)
     val state = RegInit(start);
@@ -28,6 +35,11 @@ class Divider(bitWidth: Int) extends Module {
         is (start) {
 
             when (io.start) {
+                stepI       :=   (bitWidth - 1).U
+                io.remainder    :=  0.U;
+                io.quotient     :=  0.asUInt;
+                io.done         :=  false.B;
+
                 divisor     :=  io.divisor
                 dividend    :=  io.dividend
                 state       :=  calculate
@@ -36,31 +48,25 @@ class Divider(bitWidth: Int) extends Module {
 
         is (calculate) {
 
-            when (io.start) {
+            when (stepI >= 0.U) {
 
                 when (divisor === 0.U) {
                     remainder := dividend
                     state := done
                 }
 
-                val intermediateRem =  (remainder << 1.U ) + io.dividend(stepI)  // R' = 2*R + A[i];
+                val intermediateRem =  (remainder << 1.U ) + dividend(stepI)  // R' = 2*R + A[i];
 
-                /* 
-                if (R' == B) {
-                    Q[i] = 1;
-                    R = 0;
+                when (intermediateRem < divisor) {
+                    quotient(stepI) := 0.U
+                    remainder       := intermediateRem
                 }
-                else {
-                    Q[i] = 0;
-                    R = R';
+                .otherwise {
+                    quotient(stepI) := 1.U
+                    remainder       := intermediateRem - divisor
                 }
-                */
-                val remEqualToDivident = (intermediateRem === io.divisor);
-                quotient(stepI) := Mux(remEqualToDivident , 1.U , 0.U)
-                remainder := Mux(remEqualToDivident , 0.U , intermediateRem) 
 
                 when (stepI === 0.U) {
-                    
                     state := done
                 }
                 .otherwise {
@@ -79,11 +85,8 @@ class Divider(bitWidth: Int) extends Module {
                 io.remainder    :=  remainder;
                 io.quotient     :=  quotient.asUInt;
                 io.done         :=  true.B;
-
-            when (io.start) {
-                state   :=  start
-            }
-            
+                state := start
+                
         }
 
     }
