@@ -49,7 +49,11 @@ class RV32I (
     is(NEXT_PC_SELECT.BRANCH) {
       io_pc.pc_wdata := Mux(branch_unit.io_branch.branch_taken, io_pc.pc + decoder.io_decoder.imm, (io_pc.pc + 4.U))
     }
+    is (NEXT_PC_SELECT.ALU_OUT_ALIGNED) {
+      io_pc.pc_wdata := alu.io_alu.result & "hFFFFFFFE".U
+    }
   }
+
   io_pc.pc_we := control_unit.io_ctrl.stall === STALL_REASON.NO_STALL
 
   // Assign the register file interface

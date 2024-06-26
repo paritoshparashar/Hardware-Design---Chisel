@@ -85,7 +85,7 @@ class ControlUnit extends AbstractControlUnit {
       }
       is (RISCV_OP.JAL) {
         stalled := STALL_REASON.NO_STALL
-        io_ctrl.next_pc_select  := NEXT_PC_SELECT.BRANCH
+        io_ctrl.next_pc_select  := NEXT_PC_SELECT.ALU_OUT_ALIGNED
 
         io_ctrl.reg_we  :=  true.B
         io_ctrl.reg_write_sel := REG_WRITE_SEL.PC_PLUS_4
@@ -98,7 +98,7 @@ class ControlUnit extends AbstractControlUnit {
       is (RISCV_OP.JALR) {
         
         stalled := STALL_REASON.NO_STALL
-        io_ctrl.next_pc_select  := NEXT_PC_SELECT.BRANCH
+        io_ctrl.next_pc_select := NEXT_PC_SELECT.ALU_OUT_ALIGNED
 
         io_ctrl.reg_we  :=  true.B
         io_ctrl.reg_write_sel := REG_WRITE_SEL.PC_PLUS_4
