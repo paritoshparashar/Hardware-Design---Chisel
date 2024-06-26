@@ -115,7 +115,14 @@ class ControlUnit extends AbstractControlUnit {
         io_ctrl.alu_op_2_sel := ALU_OP_2_SEL.IMM
 
         io_ctrl.reg_we := true.B
-        io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED
+        when (RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F100  || RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F101) {
+          // Unsigned
+          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED
+        } 
+        .otherwise {
+          // Signed
+          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_SIGN_EXTENDED
+        }
 
         io_ctrl.data_we := false.B
         io_ctrl.data_req := true.B
