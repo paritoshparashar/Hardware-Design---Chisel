@@ -84,6 +84,7 @@ class ControlUnit extends AbstractControlUnit {
         io_ctrl.data_be := Fill(2, RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1)) ## RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1,0).orR ## 1.U(1.W)
       }
       is (RISCV_OP.JAL) {
+
         stalled := STALL_REASON.NO_STALL
         io_ctrl.next_pc_select  := NEXT_PC_SELECT.ALU_OUT_ALIGNED
 
@@ -93,7 +94,6 @@ class ControlUnit extends AbstractControlUnit {
         io_ctrl.alu_control := ALU_CONTROL.ADD // Unnecessary
         io_ctrl.alu_op_1_sel := ALU_OP_1_SEL.PC
         io_ctrl.alu_op_2_sel := ALU_OP_2_SEL.IMM
-
       }
       is (RISCV_OP.JALR) {
         
@@ -106,7 +106,21 @@ class ControlUnit extends AbstractControlUnit {
         io_ctrl.alu_control := ALU_CONTROL.ADD // Unnecessary
         io_ctrl.alu_op_1_sel := ALU_OP_1_SEL.RS1
         io_ctrl.alu_op_2_sel := ALU_OP_2_SEL.IMM
-        
+      }
+      is (RISCV_OP.LOAD) {
+        stalled := STALL_REASON.EXECUTION_UNIT
+
+        io_ctrl.alu_control := ALU_CONTROL.ADD
+        io_ctrl.alu_op_1_sel := ALU_OP_1_SEL.RS1
+        io_ctrl.alu_op_2_sel := ALU_OP_2_SEL.IMM
+
+        io_ctrl.reg_we := true.B
+        io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED
+
+        io_ctrl.data_we := false.B
+        io_ctrl.data_req := true.B
+        // Used to encode, the amount of bytes are being read from memory
+        io_ctrl.data_be := Fill(2, RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1)) ## RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1,0).orR ## 1.U(1.W)
       }
 
     }
