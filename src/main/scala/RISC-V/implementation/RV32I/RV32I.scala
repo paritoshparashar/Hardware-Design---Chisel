@@ -73,10 +73,12 @@ class RV32I (
       io_reg.reg_write_data := io_pc.pc + 4.U
     }
     is(REG_WRITE_SEL.MEM_OUT_SIGN_EXTENDED) {
-      io_reg.reg_write_data := io_data.data_rdata
+        io_reg.reg_write_data := io_data.data_rdata
+      
     }
     is(REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED) {
-      io_reg.reg_write_data := io_data.data_rdata
+        io_reg.reg_write_data := io_data.data_rdata
+      
     }
   }
   

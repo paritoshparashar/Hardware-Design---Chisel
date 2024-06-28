@@ -30,8 +30,23 @@ class ControlUnit extends AbstractControlUnit {
   io_ctrl.next_pc_select := NEXT_PC_SELECT.PC_PLUS_4
 
   when(was_stalled === STALL_REASON.EXECUTION_UNIT) {
+    
     when(io_ctrl.data_gnt) {
       stalled := STALL_REASON.NO_STALL
+
+      io_ctrl.reg_we := true.B
+
+
+        when (RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F100  
+                || RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F101) {
+          // Unsigned
+          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED
+        } 
+        .otherwise {
+          // Signed
+          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_SIGN_EXTENDED
+        }
+
     }
   }.otherwise {
     switch(RISCV_TYPE.getOP(io_ctrl.instr_type)) {
@@ -114,18 +129,12 @@ class ControlUnit extends AbstractControlUnit {
         io_ctrl.alu_op_1_sel := ALU_OP_1_SEL.RS1
         io_ctrl.alu_op_2_sel := ALU_OP_2_SEL.IMM
 
-        io_ctrl.reg_we := true.B
-        when (RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F100  || RISCV_TYPE.getFunct3(io_ctrl.instr_type) === RISCV_FUNCT3.F101) {
-          // Unsigned
-          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_ZERO_EXTENDED
-        } 
-        .otherwise {
-          // Signed
-          io_ctrl.reg_write_sel := REG_WRITE_SEL.MEM_OUT_SIGN_EXTENDED
-        }
-
-        io_ctrl.data_we := false.B
         io_ctrl.data_req := true.B
+        io_ctrl.reg_we := false.B
+        
+        
+        io_ctrl.data_we := false.B
+        
         // Used to encode, the amount of bytes are being read from memory
         io_ctrl.data_be := Fill(2, RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1)) ## RISCV_TYPE.getFunct3(io_ctrl.instr_type).asUInt(1,0).orR ## 1.U(1.W)
       }
