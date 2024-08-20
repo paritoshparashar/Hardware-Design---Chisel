@@ -13,3 +13,7 @@ for i = n-1 to 0
   if (R’ < B) then Q[i] = 0, R = R’
               else Q[i] = 1, R = R’-B
 ```
+
+At the end of the loop, ```Q``` holds the quotient and ```R``` the remainder of the division. <br>
+The division circuit has two ```n-bit``` inputs ```dividend``` and ```divisor```, a boolean input ```start```, an implicit clock input, two ```n-bit``` outputs ```quotient``` and ```remainder```, and a boolean output ```done```. <br><br>
+The computation should start when start is set to ```true```. n clock cycles later the outputs quotient and remainder should contain the correct results and done should be set to true until the next division is initiated. Whenever start = 1 occurs the circuit should start over with the current input values. The circuit should ignore changes to inputs other than start after a computation has been started. In the following section, we provide some additional guidance.
